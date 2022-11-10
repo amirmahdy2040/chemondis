@@ -1,0 +1,43 @@
+version: '3.5'
+services:
+
+  postgres:
+    container_name: chemondis_psql
+    image: postgres:latest
+    env_file: ../src/.env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db_volume:/var/lib/postgresql/data
+  
+  web:
+    container_name: chemondis_web
+    build:
+      context: ../.
+      dockerfile: ./docker/web/Dockerfile
+    restart: always
+    command: gunicorn --bind 0.0.0.0:8000 app.wsgi:application
+    entrypoint: /src/docker/web-entrypoint.sh
+    env_file: ../src/.env
+    volumes:
+      - ../src/static:/src/static/
+    expose:
+      - 8000
+    depends_on:
+      - postgres
+
+  nginx:
+    container_name: chemondis_nginx
+    build:
+      context: ../.
+      dockerfile: ./docker/nginx/Dockerfile
+    restart: always
+    volumes:
+      - ../src/static:/src/static/
+    ports:
+      - 80:80
+    depends_on:
+      - web
+
+volumes:
+  db_volume:
