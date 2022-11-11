@@ -1,11 +1,11 @@
 import requests
 import json
-
+from weather.models import OpenWeatherToken
 
 class OpenWeather:
 
     def __init__(self) -> None:
-        self.TOKEN = "TOKEN"
+        self.TOKEN = OpenWeatherToken.objects.first().token
         self.URL = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
 
     # This function only calls the endpoint

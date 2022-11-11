@@ -1,3 +1,4 @@
 from django.contrib import admin
+from weather.models import OpenWeatherToken
 
-# Register your models here.
+admin.site.register(OpenWeatherToken)

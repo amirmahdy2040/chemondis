@@ -6,5 +6,6 @@ done
 
 ./manage.py collectstatic --noinput
 ./manage.py migrate
+./manage.py loaddata app/fixture/*.json
 
 exec "$@"
