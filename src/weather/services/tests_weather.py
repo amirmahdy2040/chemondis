@@ -19,3 +19,16 @@ class TestWeather(TestCase):
                 result.status_code, cities[city],
                 msg=f"The response for {city} is not as expected {cities[city]}")
 
+    def test_call(self):
+        """
+        This method checks if the reponse of the method is in dict format.
+        """
+        from weather.services.weather import OpenWeather
+        ow = OpenWeather()
+        cities = {"Berlin": "Berlin", "Guangzhou": "Guangzhou",
+                  "Notvalidcity": "city not found", "Munich": "Munich", "Tehran": "Tehran"}
+        for city in cities:
+            result = ow.call(city=city)
+            self.assertEqual(
+                result["name"], cities[city],
+                msg=f"The response for {city} is not as expected {cities[city]}")
