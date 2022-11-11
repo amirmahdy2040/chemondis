@@ -32,3 +32,40 @@ class TestWeather(TestCase):
             self.assertEqual(
                 result["name"], cities[city],
                 msg=f"The response for {city} is not as expected {cities[city]}")
+
+    def test_degree_direction(self):
+        """
+        This method checks if the direction is correctly calculated
+        """
+        pass
+
+    def test_validate_function(self):
+        """
+        This method check validate function inside class
+        The response variable is an imaginary reponse from the Openweather
+        """
+        from weather.services.weather import OpenWeather
+        ow = OpenWeather()
+        response1 = {"weather": ["wind", "temperature", "humidity", {"description": "This is a desc"}]}
+        response2 = {"weather": {"wind": "90", "temperature": "19", "humidity": "50", "description": "This is a desc"}}
+        response3 = {"error": "Server error"}
+        response4 = {"coord": {"lon": 13.4105, "lat": 52.5244},
+                     "weather": [{"id": 800, "main": "Clear", "description": "clear sky", "icon": "01d"}],
+                     "base": "stations",
+                     "main":
+                     {"temp": 284.98, "feels_like": 284.23, "temp_min": 283.7, "temp_max": 286.58, "pressure": 1020,
+                      "humidity": 77},
+                     "visibility": 10000, "wind": {"speed": 6.26, "deg": 226, "gust": 7.15},
+                     "clouds": {"all": 0},
+                     "dt": 1668162287,
+                     "sys": {"type": 2, "id": 2011538, "country": "DE", "sunrise": 1668147639, "sunset": 1668180012},
+                     "timezone": 3600, "id": 2950159, "name": "Berlin", "cod": 200}
+
+        self.assertEqual(ow.validate("weather", 3, "description", response=response1), "This is a desc")
+        self.assertEqual(ow.validate("weather", "description", response=response2), "This is a desc")
+        self.assertEqual(
+            ow.validate("weather", 3, "description", response=response3),
+            "Incomplete response from server")
+        self.assertEqual(ow.validate("weather", 0, "description", response=response4), "clear sky")
+        self.assertEqual(ow.validate("main", "feels_like", response=response4), 284.23)
+        self.assertEqual(ow.validate("clouds", "all", response=response4), 0)

@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/src/manage.py",
             "args": [
                 "test",
-                "weather.services.tests_weather.TestWeather.test_call"
+                "weather.services.tests_weather.TestWeather.test_validate_function"
             ],
             "django": true,
             "justMyCode": true

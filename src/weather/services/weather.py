@@ -24,24 +24,35 @@ class OpenWeather:
 
         output["name"] = self.validate("name", response=response)
         output["description"] = self.validate("weather", 0, "description", response=response)
+        output["temperature"] = {
+            "min": self.validate("main", "temp_min", response=response),
+            "max": self.validate("main", "temp_max", response=response)}
+        output["humidity"] = self.validate("weather", "humidity", response=response)
+        output["pressure"] = self.validate("weather", "pressure", response=response)
+        output["wind"] = {
+            "speed": self.validate("wind", "speed", response=response),
+            "direction": self.validate("wind", "deg", response=response)}
 
         return output
 
+    # This function retrieves the desired key by checking the type of response
+    # It will return a message if the key is not found
+    # If the message key is not present an error "Incomplete response from server" will be sent
+    # Note: The input is in multi-dimensional format
+    # TODO: Error handling should be added
     def validate(self, *key, response):
         val = response
         for ky in key:
-            if type(ky) == str:
+            if type(val) == dict:
                 val = val.get(ky, None)
 
-            elif type(ky) == int:
+            elif type(val) == list:
                 val = val[ky] if len(val) >= ky else None
 
             if val is None:
-                break
+                return response.get("message", "Incomplete response from server")
 
-        if val is None and response["cod"] != 200:
-            return response["message"]
-        elif val is None and response["cod"] == 200:
-            return "Incomplete response from server"
-        else:
-            return val
+        return val
+
+    def degree_to_direction(self, degree):
+        return True
