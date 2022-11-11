@@ -33,12 +33,6 @@ class TestWeather(TestCase):
                 result["name"], cities[city],
                 msg=f"The response for {city} is not as expected {cities[city]}")
 
-    def test_degree_direction(self):
-        """
-        This method checks if the direction is correctly calculated
-        """
-        pass
-
     def test_validate_function(self):
         """
         This method check validate function inside class
@@ -69,3 +63,15 @@ class TestWeather(TestCase):
         self.assertEqual(ow.validate("weather", 0, "description", response=response4), "clear sky")
         self.assertEqual(ow.validate("main", "feels_like", response=response4), 284.23)
         self.assertEqual(ow.validate("clouds", "all", response=response4), 0)
+
+    def test_degree_direction(self):
+        """
+        This method checks if the direction is correctly calculated
+        """
+        from weather.services.weather import OpenWeather
+        ow = OpenWeather()
+
+        degree = {30: "N", 0: "N", 44: "N", 46: "E", 360: "N", 480: "E"}
+        for dg in degree:
+            dir = ow.degree_to_direction(dg)
+            self.assertEqual(dir, degree[dg])

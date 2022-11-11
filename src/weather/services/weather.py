@@ -31,7 +31,7 @@ class OpenWeather:
         output["pressure"] = self.validate("weather", "pressure", response=response)
         output["wind"] = {
             "speed": self.validate("wind", "speed", response=response),
-            "direction": self.validate("wind", "deg", response=response)}
+            "direction": self.degree_to_direction(self.validate("wind", "deg", response=response))}
 
         return output
 
@@ -54,5 +54,12 @@ class OpenWeather:
 
         return val
 
+    # This function divides the input degree by the number of directions needed
+    # The residual of the above number and the number of directions is the direction
+    # The direction should be in clockwise format.
+    # Sub directions can also be added incuding NE, NW, ...
+    # TODO: Error handling should be added
     def degree_to_direction(self, degree):
-        return True
+        dirs = ['N', 'E', 'S', 'W']
+        ix = int(round(degree / (360. / len(dirs))))
+        return dirs[ix % len(dirs)]
