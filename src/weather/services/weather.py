@@ -1,11 +1,20 @@
 import requests
 import json
 from weather.models import OpenWeatherToken
+from django.utils.translation import gettext as _
+from app.cache import Cache
+
 
 class OpenWeather:
 
     def __init__(self) -> None:
-        self.TOKEN = OpenWeatherToken.objects.first().token
+        try:
+            token = OpenWeatherToken.objects.first()
+            self.TOKEN = token.token
+            self.LIFE_CYCYLE = token.cache
+            self.cache = Cache()
+        except:
+            raise Exception(_("Token is not found"))
         self.URL = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
 
     # This function only calls the endpoint
@@ -21,19 +30,20 @@ class OpenWeather:
         output = {}
         response = self.raw_call(city)
         response = json.loads(response.text)
-
-        output["name"] = self.validate("name", response=response)
-        output["description"] = self.validate("weather", 0, "description", response=response)
-        output["temperature"] = {
-            "min": self.validate("main", "temp_min", response=response),
-            "max": self.validate("main", "temp_max", response=response)}
-        output["humidity"] = self.validate("weather", "humidity", response=response)
-        output["pressure"] = self.validate("weather", "pressure", response=response)
-        output["wind"] = {
-            "speed": self.validate("wind", "speed", response=response),
-            "direction": self.degree_to_direction(self.validate("wind", "deg", response=response))}
-
-        return output
+        if self.validate("cod", response=response) == 200:
+            output["name"] = self.validate("name", response=response)
+            output["description"] = self.validate("weather", 0, "description", response=response)
+            output["temperature"] = {
+                "min": self.validate("main", "temp_min", response=response),
+                "max": self.validate("main", "temp_max", response=response)}
+            output["humidity"] = self.validate("main", "humidity", response=response)
+            output["pressure"] = self.validate("main", "pressure", response=response)
+            output["wind"] = {
+                "speed": self.validate("wind", "speed", response=response),
+                "direction": self.degree_to_direction(self.validate("wind", "deg", response=response))}
+            return output
+        else:
+            return {"Error": self.validate("message", response=response)}
 
     # This function retrieves the desired key by checking the type of response
     # It will return a message if the key is not found

@@ -1,0 +1,98 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{title}}</title>
+</head>
+
+<body>
+
+    <input type="text" id="city_input">
+    <button id="click_but" type="button" onclick="get_weather()">Get Weather</button>
+    <br><br>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Temp Min</th>
+            <th>Temp Max</th>
+            <th>Humidity</th>
+            <th>Pressure</th>
+            <th>Wind Speed</th>
+            <th>Wind Direction</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>
+                <h3 id="name"></h3>
+            </td>
+            <td>
+                <h3 id="temperature_min"></h3>
+            </td>
+            <td>
+                <h3 id="temperature_max"></h3>
+            </td>
+            <td>
+                <h3 id="humidity"></h3>
+            </td>
+            <td>
+                <h3 id="pressure"></h3>
+            </td>
+            <td>
+                <h3 id="wind_speed"></h3>
+            </td>
+            <td>
+                <h3 id="wind_direction"></h3>
+            </td>
+            <td>
+                <h3 id="description"></h3>
+            </td>
+        </tr>
+    </table>
+    <script>
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/');
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if ('data' in data) {
+                if ("Error" in data["data"]) {
+                    alert(data["data"]["Error"])
+                }
+                else {
+                    document.getElementById("name").innerText = data["data"]["name"]
+                    document.getElementById("temperature_min").innerText = data["data"]["temperature"]["min"]
+                    document.getElementById("temperature_max").innerText = data["data"]["temperature"]["max"]
+                    document.getElementById("humidity").innerText = data["data"]["humidity"]
+                    document.getElementById("pressure").innerText = data["data"]["pressure"]
+                    document.getElementById("wind_speed").innerText = data["data"]["wind"]["speed"]
+                    document.getElementById("wind_direction").innerText = data["data"]["wind"]["direction"]
+                    document.getElementById("description").innerText = data["data"]["description"]
+                }
+            }
+        };
+        chatSocket.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        function get_weather(e) {
+            var ct = document.getElementById("city_input").value;
+            chatSocket.send('{"type":"unsubscribe"}')
+            chatSocket.send('{"type":"subscribe", "city":"' + ct + '"}');
+
+            fetch(document.location.origin + "/api/weather/", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "city": ct })
+            }).then((response) => response.text())
+                .then((text) => {
+                    const text_js = JSON.parse(text);
+                    if ("Error" in text_js) {
+                        alert(text_js["Error"]);
+                    }
+                });
+        }
+
+    </script>
+</body>
+
+</html>

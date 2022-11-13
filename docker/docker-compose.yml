@@ -9,7 +9,7 @@ services:
       - 5432:5432
     volumes:
       - ./db_volume:/var/lib/postgresql/data
-  
+
   web:
     container_name: chemondis_web
     build:
@@ -25,6 +25,25 @@ services:
       - 8000
     depends_on:
       - postgres
+
+  asgiserver:
+    build:
+      context: ../.
+      dockerfile: ./docker/asgi/Dockerfile
+    restart: always
+    container_name: chemondis_asgi
+    command: daphne app.asgi:application --bind 0.0.0.0 --port 8010
+    depends_on:
+      - redis
+    expose:
+      - 8010
+
+  redis:
+    container_name: chemondis_redis
+    image: redis:6-alpine
+    restart: always
+    ports:
+      - 6379:6379
 
   nginx:
     container_name: chemondis_nginx

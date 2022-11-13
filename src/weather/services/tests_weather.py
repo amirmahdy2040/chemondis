@@ -1,10 +1,11 @@
-from unittest import TestCase
+from django.test import TestCase
 
 
 class TestWeather(TestCase):
 
     def setUp(self):
-        pass
+        from weather.models import OpenWeatherToken
+        OpenWeatherToken.objects.create(name="amir", token="cef6c985055cfcc415f21024269ebdb4", cache=1)
 
     def test_call_api(self):
         """
@@ -25,8 +26,7 @@ class TestWeather(TestCase):
         """
         from weather.services.weather import OpenWeather
         ow = OpenWeather()
-        cities = {"Berlin": "Berlin", "Guangzhou": "Guangzhou",
-                  "Notvalidcity": "city not found", "Munich": "Munich", "Tehran": "Tehran"}
+        cities = {"Berlin": "Berlin", "Guangzhou": "Guangzhou", "Munich": "Munich", "Tehran": "Tehran"}
         for city in cities:
             result = ow.call(city=city)
             self.assertEqual(
