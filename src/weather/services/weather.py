@@ -1,8 +1,9 @@
 import requests
 import json
+import pickle
 from weather.models import OpenWeatherToken
 from django.utils.translation import gettext as _
-from app.cache import Cache
+from django.core.cache import cache
 
 
 class OpenWeather:
@@ -11,8 +12,7 @@ class OpenWeather:
         try:
             token = OpenWeatherToken.objects.first()
             self.TOKEN = token.token
-            self.LIFE_CYCYLE = token.cache
-            self.cache = Cache()
+            self.LIFE_CYCYLE = token.cache * 60
         except:
             raise Exception(_("Token is not found"))
         self.URL = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
@@ -27,23 +27,31 @@ class OpenWeather:
     # This function returns the dict required for view
     # TODO: Error handling should be added
     def call(self, city):
-        output = {}
-        response = self.raw_call(city)
-        response = json.loads(response.text)
-        if self.validate("cod", response=response) == 200:
-            output["name"] = self.validate("name", response=response)
-            output["description"] = self.validate("weather", 0, "description", response=response)
-            output["temperature"] = {
-                "min": self.validate("main", "temp_min", response=response),
-                "max": self.validate("main", "temp_max", response=response)}
-            output["humidity"] = self.validate("main", "humidity", response=response)
-            output["pressure"] = self.validate("main", "pressure", response=response)
-            output["wind"] = {
-                "speed": self.validate("wind", "speed", response=response),
-                "direction": self.degree_to_direction(self.validate("wind", "deg", response=response))}
-            return output
+        cached_val = cache.get(city)
+
+        if cached_val is not None:
+            return pickle.loads(cached_val)
+
         else:
-            return {"Error": self.validate("message", response=response)}
+            output = {}
+            response = self.raw_call(city)
+            response = json.loads(response.text)
+            if self.validate("cod", response=response) == 200:
+                output["name"] = self.validate("name", response=response)
+                output["description"] = self.validate("weather", 0, "description", response=response)
+                output["temperature"] = {
+                    "min": self.validate("main", "temp_min", response=response),
+                    "max": self.validate("main", "temp_max", response=response)}
+                output["humidity"] = self.validate("main", "humidity", response=response)
+                output["pressure"] = self.validate("main", "pressure", response=response)
+                output["wind"] = {
+                    "speed": self.validate("wind", "speed", response=response),
+                    "direction": self.degree_to_direction(self.validate("wind", "deg", response=response))}
+
+                cache.set(city, pickle.dumps(output), timeout=self.LIFE_CYCYLE)
+                return output
+            else:
+                return {"Error": self.validate("message", response=response)}
 
     # This function retrieves the desired key by checking the type of response
     # It will return a message if the key is not found

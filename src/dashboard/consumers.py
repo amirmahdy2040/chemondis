@@ -12,7 +12,6 @@ class DashboardConsumer(AsyncJsonWebsocketConsumer):
         groups = copy.deepcopy(self.groups)
         for group in groups:
             await self.unsubscribe_to_topic(group)
-            print("About to be delete", group)
 
     async def receive_json(self, content):
         try:

@@ -10,3 +10,4 @@ channels~=3.0.4
 websockets~=10.3
 channels_redis~=3.4.0
 redis~=4.3.4
+django_redis~=5.2.0
