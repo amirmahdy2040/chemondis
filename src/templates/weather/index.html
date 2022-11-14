@@ -1,27 +1,55 @@
 {% load static %}
+{% load i18n %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <title>{{title}}</title>
+    <style>
+        table, td, th {
+          border: 1px solid;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        </style>
 </head>
 
 <body>
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+            <option id="languages" value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                {{ language.name_local }} ({{ language.code }})
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+    
+    <br><br>
 
     <input type="text" id="city_input">
-    <button id="click_but" type="button" onclick="get_weather()">Get Weather</button>
+    <button id="click_but" type="button" onclick="get_weather()">{% translate "Get Weather" %}</button>
+
     <br><br>
+
     <table>
         <tr>
-            <th>Name</th>
-            <th>Temp Min</th>
-            <th>Temp Max</th>
-            <th>Humidity</th>
-            <th>Pressure</th>
-            <th>Wind Speed</th>
-            <th>Wind Direction</th>
-            <th>Description</th>
+            <th>{% translate "Name" %}</th>
+            <th>{% translate "Temp Min" %}</th>
+            <th>{% translate "Temp Max" %}</th>
+            <th>{% translate "Humidity" %}</th>
+            <th>{% translate "Pressure" %}</th>
+            <th>{% translate "Wind Speed" %}</th>
+            <th>{% translate "Wind Direction" %}</th>
+            <th>{% translate "Description" %}</th>
         </tr>
         <tr>
             <td>
@@ -81,7 +109,7 @@
 
             fetch(document.location.origin + "/api/weather/", {
                 method: "POST",
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept-language': document.getElementById("languages").value },
                 body: JSON.stringify({ "city": ct })
             }).then((response) => response.text())
                 .then((text) => {

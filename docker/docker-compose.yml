@@ -21,6 +21,7 @@ services:
     env_file: ../src/.env
     volumes:
       - ../src/static:/src/static/
+      - ../src/templates:/src/templates/
     expose:
       - 8000
     depends_on:
@@ -53,6 +54,7 @@ services:
     restart: always
     volumes:
       - ../src/static:/src/static/
+      - ../src/templates:/src/templates/
     ports:
       - 80:80
     depends_on:

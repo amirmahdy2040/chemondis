@@ -1,5 +1,6 @@
 import os
 import environ
+from django.utils.translation import gettext_lazy as _
 
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 env = environ.Env(
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -79,7 +81,6 @@ DATABASES = {
 }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -116,6 +117,18 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
+
+LANGUAGES = [
+    ('de', _('German')),
+    ('fr', _('French')),
+    ('en', _('English')),
+]
+
+LANGUAGE_CODE = 'en'
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "app/locale"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

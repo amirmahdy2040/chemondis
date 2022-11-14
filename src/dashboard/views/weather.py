@@ -9,6 +9,7 @@ from weather.services.weather import OpenWeather
 from app.exception_handler import unpredicted_exception_handler
 from dashboard.broadcast import broadcast
 
+
 class WeatherAPIView(GenericAPIView):
 
     @swagger_auto_schema(methods=['post'], request_body=CitySerilizer)
@@ -24,7 +25,7 @@ class WeatherAPIView(GenericAPIView):
             data = serializer.validated_data
             ow = OpenWeather()
             dt = ow.call(data['city'])
-            broadcast(data['city'],dt)
-            return Response({"message": "OK", "data":data}, status=status.HTTP_200_OK)
+            broadcast(data['city'], dt)
+            return Response({"message": "OK", "data": data}, status=status.HTTP_200_OK)
         else:
             return Response({"Error": str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST)
