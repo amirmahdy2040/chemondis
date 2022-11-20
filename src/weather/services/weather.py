@@ -15,7 +15,7 @@ class OpenWeather:
             self.LIFE_CYCYLE = token.cache * 60
         except:
             raise Exception(_("Token is not found"))
-        self.URL = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
+        self.URL = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}&units=metric"
 
     # This function only calls the endpoint
     # TODO: Error handling should be added
